@@ -1,0 +1,29 @@
+{
+  "stages": {
+    "retrieved": 328270,
+    "unique": 292845,
+    "relevant": 48646,
+    "english": 46945,
+    "deduped": 44047,
+    "clean": 40735,
+    "coded": 1800,
+    "analysis": 1205
+  },
+  "per_source": {
+    "mediacloud": {
+      "retrieved": 201900,
+      "clean": 12230,
+      "survival_pct": 6.1
+    },
+    "hackernews": {
+      "retrieved": 9393,
+      "clean": 951,
+      "survival_pct": 10.1
+    },
+    "reddit": {
+      "retrieved": 116977,
+      "clean": 27554,
+      "survival_pct": 23.6
+    }
+  }
+}

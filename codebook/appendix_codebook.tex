@@ -1,0 +1,195 @@
+%=======================================================================
+%  APPENDIX A: Frame-coding codebook (final version)
+%  Paste after \appendix in Final_Report.tex, replacing the placeholder
+%  \section{Codebook and coding prompt}.
+%  Requires: booktabs, enumitem (both already loaded in the preamble).
+%=======================================================================
+\section{Frame-coding codebook}
+\label{app:codebook}
+
+This is the instrument used for all coding. It was applied by three coders: by
+me on the 300-item validation set, by \texttt{claude-opus-5} on all
+\Ncoded{} items, and by GABRIEL on \texttt{gpt-4o} as a cross-check on the
+coarse frame only. The text supplied to the model is this codebook compiled into
+a system prompt, cached as a fixed prefix so that every item was coded against
+identical instructions. The full codebook, the pilot draft that preceded it, the
+worked-example coding guide and the exact system prompt are released with the
+code.
+
+\subsection{Unit of analysis}
+
+\begin{table}[htbp]\centering
+\small
+\begin{tabular}{ll}
+\toprule
+Source & What is coded\\
+\midrule
+News (MediaCloud) & the headline only; body text is not consulted \cite{liu2019}\\
+Reddit            & the submission title plus the first 100 words of self-text\\
+Hacker News       & the story title plus the first 100 words of story text\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+HTML entities and tags are removed before coding, so the human coder and the
+model see identical characters.
+
+\subsection{Step 0: scope}
+
+The coder asks whether the text makes a claim, however indirect, about AI's
+effect on human work. If it does not, the item is coded \textsc{tangential},
+all four function codes are set to \textsc{none}, and coding stops. Items
+excluded at this step include AI product announcements with no labour claim, job
+advertisements, technical discussion of AI with no reference to work, labour
+news with no AI component, and items where AI and work appear together only
+incidentally.
+
+\begin{quote}
+\textbf{R0. Topic is not the same as frame.} An item being \emph{about} AI and
+jobs does not mean it \emph{frames} AI's labour effect. Code the
+characterisation the text builds, not the subject it mentions. If it mentions
+both but characterises neither, it is \textsc{tangential}.
+\end{quote}
+
+R0 is the codebook's response to the finding that automated framing methods
+often recover topic instead \cite{nicholls2021}. It is also why the tangential
+rate is treated as a statement about retrieval precision rather than about coder
+reliability: an item enters the corpus by containing an AI term and a labour
+term, and some sources meet that test far more often without saying anything
+about the relationship between the two. Observed rates were 45.8\% for Hacker
+News, 27.7\% for Reddit and 25.7\% for MediaCloud.
+
+\subsection{Step 1: the coarse frame}
+
+Exactly one label is assigned.
+
+\begin{table}[htbp]\centering
+\small
+\begin{tabular}{p{2.6cm}p{11.4cm}}
+\toprule
+Code & Definition\\
+\midrule
+\textsc{replacement}    & AI takes over work people used to do; people leave the task, job or occupation.\\
+\textsc{augmentation}   & AI extends or assists human work; people stay involved.\\
+\textsc{transformation} & AI restructures what work is or how it is organised, which is neither straightforward loss nor straightforward gain.\\
+\textsc{mixed}          & Two or more of the above carry roughly equal weight in the same item.\\
+\textsc{tangential}     & Did not pass Step 0.\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{description}[leftmargin=2.6em,style=nextline,nosep]
+  \item[R1] \textbf{Dominance.} Where one frame is clearly in front, through
+        headline emphasis, the opening clause or evaluative wording, code that
+        frame even if another is present. Use \textsc{mixed} only where the two
+        are genuinely balanced. The pilot draft set 15\% \textsc{mixed} as a
+        warning level; the observed rate was 2.7\%.
+  \item[R2] \textbf{Questions carry their assumption.} A headline asked as a
+        question, such as ``Will AI take your job?'', is coded to the frame the
+        question assumes. Posing something as a question does not remove the
+        frame.
+  \item[R3] \textbf{Denial still invokes.} A text arguing \emph{against} a frame
+        is coded to the frame it engages, with the moral evaluation field
+        capturing the stance. RQ1 asks which frames structure the discussion,
+        not which ones people endorse.
+  \item[R4] \textbf{Sarcasm.} Code the frame the words invoke unless the sarcasm
+        is unmistakable from the item alone. No thread context is available.
+  \item[R5] \textbf{No outside knowledge.} Code only what the text says, using
+        nothing known about the linked article, the author, or later events.
+\end{description}
+
+\subsection{Step 2: the four Entman functions}
+
+One value per function. \textsc{none} is a legitimate and common answer, because
+headlines often carry only one or two of the four functions.
+
+\begin{table}[htbp]\centering
+\small
+\begin{tabular}{ll}
+\toprule
+Function & Values\\
+\midrule
+Problem definition       & \textsc{job\_loss}, \textsc{skill\_change}, \textsc{opportunity}, \textsc{inequality\_power}, \textsc{none}\\
+Causal attribution       & \textsc{technology}, \textsc{firms}, \textsc{policy}, \textsc{workers}, \textsc{none}\\
+Moral evaluation         & \textsc{negative}, \textsc{positive}, \textsc{ambivalent}, \textsc{neutral}, \textsc{none}\\
+Treatment recommendation & \textsc{regulate}, \textsc{adapt}, \textsc{redistribute}, \textsc{accelerate}, \textsc{none}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Two distinctions matter in application. Under moral evaluation,
+\textsc{neutral} means the text evaluates and lands on neither good nor bad,
+whereas \textsc{none} means there is no evaluative content at all. Under
+treatment recommendation, \textsc{none} dominates the field: 81.6\% of
+replacement-framed items and roughly four fifths of all items recommend nothing.
+This is a substantive result, but it also drives the low reliability figure
+discussed below, and a coder should not invent a recommendation in order to
+avoid choosing \textsc{none}.
+
+A confidence rating of 1 to 3 and a free-text note accompany each item. Human
+and model confidence agree only weakly (Krippendorff's $\alpha = 0.324$,
+ordinal), so confidence is reported descriptively and never used as a weight, a
+filter or a reason to exclude an item.
+
+\subsection{Reliability}
+
+The threshold was fixed in the proposal before any coding took place: Cohen's
+$\kappa \geq \kappaTarget{}$ on three or more of the four Entman functions,
+with a fallback to a three-category typology at $\kappa \geq 0.55$ if that were
+not met.
+
+\begin{table}[htbp]\centering
+\caption{Agreement between the human coder and the primary model on the
+\Nval{}-item validation set. Three of four functions passed, so the full
+four-function scheme was retained and no fallback was used.}
+\label{tab:app-reliability}
+\small
+\begin{tabular}{lcccc}
+\toprule
+Variable & $\kappa$ (all 300) & $\kappa$ (excl.\ tangential) & Raw agreement & Difference\\
+\midrule
+Coarse frame             & 0.797 & 0.765 & 0.860 & 0.063\\
+Problem definition       & 0.834 & 0.860 & 0.887 & 0.053\\
+Causal attribution       & 0.792 & 0.749 & 0.857 & 0.065\\
+Moral evaluation         & 0.803 & 0.794 & 0.853 & 0.050\\
+Treatment recommendation & 0.591 & 0.641 & 0.877 & 0.286\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Treatment recommendation is the one value below the threshold, and the reason is
+the distribution of answers rather than the care taken in coding. Its raw
+agreement of 0.877 is the second highest of the five variables, but because
+roughly four fifths of items recommend nothing, a large amount of agreement is
+expected by chance and the correction is severe. The final column of
+Table~\ref{tab:app-reliability} shows this directly: the difference between raw
+agreement and $\kappa$ is 0.286 for treatment against 0.050 to 0.065 for every
+other variable. Both figures are reported so that the coefficient is not read as
+evidence of unreliable coding. Consistent with that explanation, treatment is
+the only variable whose $\kappa$ rises when tangential items are removed.
+
+Per-ecosystem $\kappa$ ranges from 0.745 to 0.876 for the coarse frame and the
+first three functions, indicating no drift in coding between sources. Treatment
+varies more, from 0.467 on Hacker News to 0.683 on MediaCloud, which follows the
+same explanation, since the share of items recommending nothing itself differs
+by source.
+
+\subsection{Known limitations of the instrument}
+
+\begin{enumerate}[nosep,leftmargin=1.6em]
+  \item \textbf{One human coder.} Reliability here mixes the quality of the
+        instrument with my own consistency. Re-reading my earlier codes surfaced
+        two items I would have coded differently later. A second coder on 50 to
+        100 items would separate the two effects.
+  \item \textbf{Implicit framing is not captured.} Both the relevance rule and
+        the coding operate on explicit wording, so a post that implies job loss
+        without naming AI or work in recognisable terms never reaches the coder.
+  \item \textbf{Text length differs by source.} News items have a median of 13
+        words against 106 to 109 for the two forums, and the four functions are
+        easier to detect when there is more text. The length-split check in
+        Section~4.3 holds, but re-coding the forum items on their titles alone
+        would be a cleaner test and was not run.
+  \item \textbf{No thread context.} R4 requires sarcasm to be unmistakable from
+        the item alone, which will miss irony that a reader of the full thread
+        would catch.
+\end{enumerate}

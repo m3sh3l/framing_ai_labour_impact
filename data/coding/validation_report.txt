@@ -1,0 +1,40 @@
+VALIDATION GATE — human vs LLM, n=300
+Criterion: kappa >= 0.6 on >=3 of 4 Entman functions (proposal §3.4)
+
+ALL ITEMS
+variable            n   kappa   agree  interpretation
+coarse_frame      300   0.797   0.860  substantial
+problem           300   0.834   0.887  almost perfect
+cause             300   0.792   0.857  substantial
+moral             300   0.803   0.853  substantial
+treatment         300   0.591   0.877  moderate
+
+EXCLUDING TANGENTIAL (n=191) — the frame distinctions the study rests on
+coarse_frame      191   0.765   0.874  substantial
+problem           191   0.860   0.916  almost perfect
+cause             191   0.749   0.859  substantial
+moral             191   0.794   0.864  substantial
+treatment         191   0.641   0.853  substantial
+
+PER ECOSYSTEM (detects drift across sources)
+variable          hackernews  mediacloud      reddit
+coarse_frame           0.759       0.777       0.837
+problem                0.808       0.808       0.876
+cause                  0.873       0.749       0.745
+moral                  0.758       0.779       0.847
+treatment              0.467       0.683       0.572
+
+confidence (Krippendorff alpha, ordinal): 0.324
+
+TOP CONFUSIONS  (human -> llm : count)
+  coarse_frame: TRANSFORMATION->REPLACEMENT: 7 | AUGMENTATION->TANGENTIAL: 5 | MIXED->TRANSFORMATION: 5
+  problem: OPPORTUNITY->NONE: 14 | SKILL_CHANGE->NONE: 5 | OPPORTUNITY->SKILL_CHANGE: 3
+  cause: TECHNOLOGY->NONE: 11 | TECHNOLOGY->FIRMS: 7 | FIRMS->NONE: 5
+  moral: AMBIVALENT->NEUTRAL: 7 | POSITIVE->NONE: 7 | AMBIVALENT->NEGATIVE: 6
+  treatment: ADAPT->NONE: 10 | REGULATE->NONE: 9 | ACCELERATE->NONE: 8
+
+====================================================================
+Entman functions at/above 0.6: 3/4  ['problem', 'cause', 'moral']
+coarse_frame kappa: 0.797
+DECISION: PASS — proceed with the full four-function schema.
+====================================================================

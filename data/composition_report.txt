@@ -1,0 +1,26 @@
+GOLD STANDARD COMPOSITION  (seed=42, n=300)
+
+source x half_year
+half_year   2022H2  2023H1  2023H2  2024H1  2024H2  2025H1  2025H2  2026H1
+source                                                                    
+hackernews      12      12      12      12      12      14      13      13
+mediacloud      12      12      12      14      13      12      12      13
+reddit          14      13      12      12      13      12      12      12
+
+block x source  (each block is a self-contained balanced subset)
+source  hackernews  mediacloud  reddit
+block                                 
+1               34          34      34
+2               33          33      33
+3               33          33      33
+
+distinct subreddits: 26; max from one = 8 (cscareerquestions)
+distinct outlets: 53; max from one = 6 (benzinga.com)
+
+DIAGNOSTIC ONLY — not stratified on (would bias kappa):
+  query_groups: {'core': 208, 'replacement': 39, 'augmentation': 32, 'occupation': 30, 'insider': 25, 'event': 19, 'policy': 11}
+  in_neutral_baseline: {True: 208, False: 92}
+  keyword_matched: {True: 293, False: 7}
+
+text unit words: median 46, p90 116, max 143
+  (news = headline only; reddit/HN = title + <=100 words body)

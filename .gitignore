@@ -1,0 +1,23 @@
+# Secrets. Never commit.
+.env
+*.key
+config.local.yaml
+
+# Corpus and raw API responses. Not redistributable under the source
+# platforms' terms, and they carry post text, URLs and author identifiers.
+data/raw/
+data/clean/
+data/state/
+data/annotation/annotation_key.csv
+data/annotation/annotation_sheet*
+data/coding/coding_input_1800.csv
+data/coding/llm_calls.jsonl
+*.duckdb
+
+# Generated
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+retrieval.log
+.venv/
+.DS_Store

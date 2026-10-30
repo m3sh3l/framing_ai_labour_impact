@@ -1,0 +1,219 @@
+# Corpus construction config — single source of truth for all retrieval scripts
+window:
+  start: "2022-11-01"          # ChatGPT launch month
+  end: "2026-05-31"
+
+targets:                        # used ONLY by the optional sampling step (make sample);
+  hackernews: 600               # the clean corpus itself keeps every relevant item
+  reddit: 600
+  mediacloud: 600
+
+stratification: half_year       # collection stratum (timestamps retained -> quarterly plots still possible)
+
+# ---------------------------------------------------------------------------
+# Query groups (keyword document sections 1-6, compiled to compact API-ready
+# queries; PullPush AND-matches all words, Algolia matches quoted tokens).
+# Group membership is recorded on every retrieved item (query_groups column)
+# so the frame-neutral-baseline selection-bias check (doc §11) is possible.
+# Frame tags are metadata only — never sampling strata.
+# ---------------------------------------------------------------------------
+query_groups:
+  core:                         # §1 frame-neutral seed terms (baseline/control pull)
+    - "AI jobs"
+    - "AI employment"
+    - "AI workforce"
+    - "AI labor market"
+    - "AI unemployment"
+    - "AI careers"
+    - "future of work"
+    - "workplace automation"
+    - "technological unemployment"
+    - "AI skills gap"
+  augmentation:                 # §2 augmentation frame
+    - "AI copilot"
+    - "AI augments"
+    - "AI assistant productivity"
+    - "upskilling AI"
+    - "reskilling AI"
+    - "working alongside AI"
+    - "human-in-the-loop"
+    - "AI productivity gains"
+  replacement:                  # §3 replacement/displacement frame
+    - "AI replaces jobs"
+    - "AI job losses"
+    - "AI takes jobs"
+    - "robots taking jobs"
+    - "AI layoffs"
+    - "AI job cuts"
+    - "AI displacement"
+    - "mass unemployment AI"
+    - "white-collar automation"
+    - "entry-level jobs AI"
+    - "jobless future"
+    - "AI headcount"
+  occupation:                   # §4 occupation/sector terms
+    - "AI customer service"
+    - "call center automation"
+    - "AI radiologists"
+    - "AI paralegals"
+    - "AI journalism"
+    - "AI writers"
+    - "AI translators"
+    - "truck drivers automation"
+    - "AI accountants"
+    - "AI teachers"
+    - "AI artists"
+    - "graphic designers AI"
+    - "AI voice actors"
+    - "warehouse automation"
+    - "AI recruiters"
+    - "junior developers AI"
+  policy:                       # §5 policy/institutional/economic terms
+    - "universal basic income"
+    - "AI regulation workers"
+    - "AI unions"
+    - "robot tax"
+    - "EU AI Act jobs"
+    - "AI economic inequality"
+    - "AI retraining"
+    - "four-day work week AI"
+    - "AI collective bargaining"
+    - "future of jobs report"
+  insider:                      # §6 practitioner discourse (HN + career/insider subs)
+    - "AI coding assistants"
+    - "AI replacing engineers"
+    - "LLM hiring"
+    - "junior dev hiring"
+    - "AI agents engineers"
+    - "vibe coding"
+    - "AI pair programmer"
+    - "prompt engineering jobs"
+    - "tech layoffs AI"
+    - "AI-native teams"
+    - "agentic AI workforce"
+    - "do more with less AI"
+
+# ---------------------------------------------------------------------------
+# RQ4 event anchors (doc §7): date-bounded pulls, items tagged event_tags.
+# ---------------------------------------------------------------------------
+events:
+  - name: chatgpt_launch
+    window: ["2022-11-01", "2023-02-28"]
+    terms: ["ChatGPT jobs", "ChatGPT replace", "ChatGPT work"]
+  - name: gpt4_goldman
+    window: ["2023-03-01", "2023-06-30"]
+    terms: ["GPT-4 jobs", "Goldman Sachs AI jobs", "300 million jobs"]
+  - name: hollywood_strikes
+    window: ["2023-03-01", "2023-12-31"]
+    terms: ["WGA AI", "SAG-AFTRA AI", "writers strike AI"]
+  - name: ibm_hiring_freeze
+    window: ["2023-05-01", "2024-06-30"]
+    terms: ["IBM hiring freeze", "IBM AI jobs"]
+  - name: ups_ai_cuts
+    window: ["2024-01-01", "2024-12-31"]
+    terms: ["UPS layoffs", "UPS AI"]
+  - name: eu_ai_act
+    window: ["2024-01-01", "2024-12-31"]
+    terms: ["EU AI Act workers", "AI Act employment"]
+  - name: klarna_ai_agents
+    window: ["2024-11-01", "2025-12-31"]
+    terms: ["Klarna AI", "Klarna customer service"]
+  - name: amodei_entry_level
+    window: ["2025-01-01", "2025-12-31"]
+    terms: ["Amodei jobs", "Anthropic entry-level", "half entry-level jobs"]
+  - name: ai_first_companies
+    window: ["2025-01-01", "2025-12-31"]
+    terms: ["Salesforce AI jobs", "Duolingo AI-first", "Accenture AI layoffs", "HP AI layoffs"]
+  - name: big_tech_cuts_2026
+    window: ["2026-01-01", "2026-05-31"]
+    terms: ["Oracle layoffs", "Meta layoffs AI", "Microsoft layoffs AI", "Atlassian layoffs AI", "Block layoffs AI"]
+  - name: ai_job_cut_tracker
+    window: ["2026-01-01", "2026-05-31"]
+    terms: ["AI job cuts share", "AI blamed layoffs"]
+
+hackernews:
+  min_comments: 5               # proposal §4.2 discursive-content threshold
+  # HN runs every query group + all event pulls (API is free and fast)
+
+reddit:
+  backend: arctic_shift         # arctic_shift | pullpush (both Pushshift-lineage archives)
+  backends:
+    arctic_shift: "https://arctic-shift.photon-reddit.com/api/posts/search"
+    pullpush: "https://api.pullpush.io/reddit/search/submission/"
+  # NB: Arctic Shift has no score sort — cells return the newest <=100 posts in
+  # their window (PullPush returned top-by-score). Extended-tier windows are
+  # yearly to preserve time-spread. Switched 2026-07-29 during PullPush outage.
+  exclude_removed: true         # ethics: skip moderator-removed/deleted posts
+  rate:                         # adaptive pacing (PullPush 429s hard at fixed 1s)
+    base_pause: 6.0             # steady cadence; 2.0 tripped Arctic Shift's burst
+                                # detector into boom-bust 60s throttle cycles
+    max_pause: 60.0             # ceiling after repeated 429 doubling
+    retries: 5                  # attempts per cell before giving up
+  # Tiered subreddit list (doc §8). Core tier: per-half-year windowed crawl
+  # (temporal coverage for RQ4). Extended tier: one full-window top-by-score
+  # sweep per query (lighter supplementary pull).
+  tiers:
+    core:
+      ai_focused:    [artificial, OpenAI, ChatGPT, singularity, MachineLearning, Futurology]
+      labour_career: [jobs, antiwork, WorkReform, cscareerquestions, ExperiencedDevs, csMajors]
+      econ_policy:   [Economics, UBI, technology]
+      insider:       [programming, startups]
+    extended:
+      ai_focused:    [ArtificialIntelligence, LocalLLaMA, AIwars, AGI]
+      labour_career: [careerguidance, careeradvice, unemployment, recruitinghell, overemployed, FinancialCareers, ITCareerQuestions]
+      occupation:    [webdev, softwareengineering, accounting, law, Teachers, radiology, graphic_design, freelanceWriters, Journalism, truckers, customerservice, humanresources, paralegal]
+      econ_policy:   [economy, FutureWhatIf, technews]
+      insider:       [cscareerquestionsEU, devops, MLQuestions, LangChain, SaaS]
+  # Scopes below are the ORIGINAL per-category keyword-crawl scopes, retained
+  # only to document how the first pass was retrieved. They were NOT uniform:
+  # augmentation was never queried against any extended-tier subreddit (34% of
+  # the clean Reddit corpus), so frame coverage varied by subreddit for reasons
+  # of retrieval design rather than discourse. See LIMITATIONS.md §1.3.
+  group_scope:                  # CORE tier — keyword crawl (historical)
+    ai_focused:    [core, augmentation, replacement, policy]
+    labour_career: [core, augmentation, replacement, insider]
+    econ_policy:   [core, policy, replacement]
+    insider:       [core, insider, replacement, augmentation]
+  extended_group_scope:         # EXTENDED tier — keyword crawl (historical)
+    ai_focused:    [core, replacement]
+    labour_career: [core, replacement]
+    occupation:    [core, occupation]
+    econ_policy:   [core, policy]
+    insider:       [core, insider]
+  # UNIFORM RETRIEVAL LAYER (2026-08-01). harvest_reddit.py --uniform matches
+  # EVERY query group against EVERY subreddit. Scoping only ever existed to
+  # bound keyword-search cost; the listing harvester pages a window regardless
+  # of query and filters locally, so uniform scope costs nothing extra and
+  # removes the confound. This layer is what RQ3 should be run on.
+  uniform_scope: [core, augmentation, replacement, occupation, policy, insider]
+  event_categories: [ai_focused, econ_policy]   # core-tier categories used for event pulls
+
+mediacloud:
+  # collection IDs confirmed via DirectoryApi 2026-07-28
+  collections:
+    national: [34412234, 34412476]   # United States - National + United Kingdom - National
+    tech_press: [186572515]          # U.S. Top Digital Native Sources 2018
+    # business_press dropped: no such collection exists in MediaCloud's directory
+    # ('business'/'finance'/'economic' all return 0 results, checked 2026-07-28).
+    # National collections include business outlets; limitation noted in report.
+  base_query: >-
+    ("artificial intelligence" OR "AI" OR chatgpt OR "generative AI" OR automation)
+    AND (jobs OR workers OR employment OR labor OR labour OR layoffs OR hiring
+         OR workforce OR "job losses" OR occupations OR wages)
+
+relevance:                      # local post-filter applied to ALL sources (title + text)
+  ai_terms: '\b(ai|a\.i\.|artificial intelligence|chatgpt|gpt-?[3-9][a-z]?|llms?|large language models?|generative ai|genai|copilot|automation|automated?|machine learning|robots?)\b'
+  labour_terms: '\b(jobs?|worker[s]?|workforce|workplace|labou?r|employ\w*|unemploy\w*|hir(e|es|ing)|lay-?offs?|laid off|careers?|occupations?|professions?|wages?|salar(y|ies)|skills?|upskill\w*|reskill\w*|displac\w*|augment\w*|replac\w*|redundan\w*|universal basic income|\bubi\b|post-work|productivity|automat\w*|headcount|teachers?|radiologists?|paralegals?|lawyers?|attorneys?|journalists?|translators?|illustrators?|copywriter[s]?|accountants?|recruit\w*|designers?|developers?|programmers?|engineers?|drivers?|freelanc\w*|gig economy|voice actors?|customer service|call cent(?:er|re)s?|warehouse)\b'
+  # NB: productivity/automation included so augmentation-side texts are not
+  # systematically under-sampled relative to replacement-side (validity check 2026-07-09).
+  # Occupation nouns added 2026-07-13 so sector-specific posts without generic
+  # labour words survive the filter (keyword doc §4).
+
+paths:
+  raw: data/raw
+  clean: data/clean
+  meta: data/meta
+  state: data/state
+  duckdb: data/corpus.duckdb
+
+
